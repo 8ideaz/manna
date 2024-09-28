@@ -1,0 +1,51 @@
+---
+version: '3.9'
+
+services:
+  manna:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    env_file:
+      - .env
+    ports:
+      - "8080:8080"
+    depends_on:
+      - database
+    networks:
+      - app-tier
+  database:
+    image: postgres
+    restart: always
+    env_file:
+      - .env
+    ports:
+      - 5432:5432
+    volumes:
+      - ./db-data/:/var/lib/postgresql/data
+  pgadmin:
+    image: dpage/pgadmin4
+    restart: always
+    env_file:
+      - .env
+      # environment:
+      #   - PGADMIN_DEFAULT_EMAIL=alwindoss84@gmail.com
+      #   - PGADMIN_DEFAULT_PASSWORD=password
+      # - PGADMIN_DEFAULT_PASSWORD_FILE=pwdfile.txt
+    ports:
+      - 8081:80
+#   kafka:
+#     image: 'bitnami/kafka:latest'
+#     networks:
+#       - app-tier
+#     environment:
+#       - KAFKA_CFG_NODE_ID=0
+#       - KAFKA_CFG_PROCESS_ROLES=controller,broker
+#       - KAFKA_CFG_LISTENERS=PLAINTEXT://:9092,CONTROLLER://:9093
+#       - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
+#       - KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=0@kafka:9093
+#       - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER
+# networks:
+#   app-tier:
+#     driver: bridge
+    
