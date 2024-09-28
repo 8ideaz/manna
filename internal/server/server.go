@@ -11,31 +11,12 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/joho/godotenv"
+	"github.com/markbates/goth"
+	"github.com/markbates/goth/providers/google"
 )
 
 // var index *views.View
 // var contact *views.View
-
-func indexHandler(v *views.View) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		log.Printf("Received request for %s", "/")
-		v.Render(w, nil)
-	}
-}
-
-func contactHandler(v *views.View) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		log.Printf("Received request for %s", "/contact")
-		v.Render(w, nil)
-	}
-}
-
-func aboutHandler(v *views.View) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		log.Printf("Received request for %s", "/about")
-		v.Render(w, nil)
-	}
-}
 
 func Run() error {
 	err := godotenv.Load()
@@ -47,6 +28,16 @@ func Run() error {
 		port = "3000"
 	}
 	addr := fmt.Sprintf(":%s", port)
+	clientID := os.Getenv("CLIENT_ID")
+	clientSecret := os.Getenv("CLIENT_SECRET")
+	clientCallbackURL := os.Getenv("CLIENT_CALLBACK_URL")
+	if clientID == "" || clientSecret == "" || clientCallbackURL == "" {
+		err = fmt.Errorf("error: Environment variables (CLIENT_ID, CLIENT_SECRET, CLIENT_CALLBACK_URL) are required")
+		return err
+	}
+	goth.UseProviders(
+		google.New(clientID, clientSecret, clientCallbackURL),
+	)
 
 	r := chi.NewRouter()
 
@@ -80,10 +71,26 @@ func Run() error {
 		PartialsDir: "web/partials",
 		Files:       []string{"web/pages/contact.html"},
 	})
+	login := views.NewView(&views.ViewOpts{
+		Layout:      "default_layout",
+		LayoutDir:   "web/layouts",
+		PartialsDir: "web/partials",
+		Files:       []string{"web/pages/login.html"},
+	})
+	loginSuccess := views.NewView(&views.ViewOpts{
+		Layout:      "default_layout",
+		LayoutDir:   "web/layouts",
+		PartialsDir: "web/partials",
+		Files:       []string{"web/pages/admin_home.html"},
+	})
 
 	r.Get("/", indexHandler(index))
 	r.Get("/about", aboutHandler(about))
 	r.Get("/contact", contactHandler(contact))
+	r.Get("/auth/{provider}", signInWithProvider())
+	r.Get("/auth/{provider}/callback", callbackHandler())
+	r.Get("/admin", loginSuccessHandler(loginSuccess))
+	r.Get("/login", showLoginPage(login))
 	log.Printf("Listening on %s", addr)
 	return http.ListenAndServe(addr, r)
 }
