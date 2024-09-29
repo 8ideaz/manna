@@ -67,9 +67,27 @@ func callbackHandler() http.HandlerFunc {
 	}
 }
 
-func loginSuccessHandler(v *views.View) http.HandlerFunc {
+func logoutHandler(v *views.View) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gothic.Logout(w, r)
+		w.Header().Set("Location", "/")
+		w.WriteHeader(http.StatusTemporaryRedirect)
+		v.Render(w, nil)
+	}
+}
+func adminHomeHandler(v *views.View) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		log.Printf("Received request for %s", "/success")
-		v.Render(w, nil)
+		provider := chi.URLParam(r, "provider")
+		q := r.URL.Query()
+		q.Add("provider", provider)
+		r.URL.RawQuery = q.Encode()
+
+		user, err := gothic.CompleteUserAuth(w, r)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		v.Render(w, user)
 	}
 }

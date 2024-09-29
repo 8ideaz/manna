@@ -77,20 +77,27 @@ func Run() error {
 		PartialsDir: "web/partials",
 		Files:       []string{"web/pages/login.html"},
 	})
-	loginSuccess := views.NewView(&views.ViewOpts{
-		Layout:      "default_layout",
+	admin := views.NewView(&views.ViewOpts{
+		Layout:      "admin_layout",
 		LayoutDir:   "web/layouts",
 		PartialsDir: "web/partials",
 		Files:       []string{"web/pages/admin_home.html"},
+	})
+	logout := views.NewView(&views.ViewOpts{
+		Layout:      "default_layout",
+		LayoutDir:   "web/layouts",
+		PartialsDir: "web/partials",
+		Files:       []string{"web/pages/index.html"},
 	})
 
 	r.Get("/", indexHandler(index))
 	r.Get("/about", aboutHandler(about))
 	r.Get("/contact", contactHandler(contact))
 	r.Get("/auth/{provider}", signInWithProvider())
-	r.Get("/auth/{provider}/callback", callbackHandler())
-	r.Get("/admin", loginSuccessHandler(loginSuccess))
+	r.Get("/auth/{provider}/callback", adminHomeHandler(admin))
+	r.Get("/admin", adminHomeHandler(admin))
 	r.Get("/login", showLoginPage(login))
+	r.Get("/logout/{provider}", logoutHandler(logout))
 	log.Printf("Listening on %s", addr)
 	return http.ListenAndServe(addr, r)
 }
