@@ -37,6 +37,13 @@ func showLoginPage(v *views.View) http.HandlerFunc {
 	}
 }
 
+func showBibleHandler(v *views.View) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		log.Printf("Received request for %s", "/bible")
+		v.Render(w, nil)
+	}
+}
+
 func signInWithProvider() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		provider := chi.URLParam(r, "provider")
@@ -88,6 +95,8 @@ func adminHomeHandler(v *views.View) http.HandlerFunc {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
+		// w.Header().Set("Location", "/admin")
+		// w.WriteHeader(http.StatusTemporaryRedirect)
 		v.Render(w, user)
 	}
 }

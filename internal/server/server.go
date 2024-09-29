@@ -89,6 +89,12 @@ func Run() error {
 		PartialsDir: "web/partials",
 		Files:       []string{"web/pages/index.html"},
 	})
+	bible := views.NewView(&views.ViewOpts{
+		Layout:      "default_layout",
+		LayoutDir:   "web/layouts",
+		PartialsDir: "web/partials",
+		Files:       []string{"web/pages/show_bible_result.html"},
+	})
 
 	r.Get("/", indexHandler(index))
 	r.Get("/about", aboutHandler(about))
@@ -98,6 +104,8 @@ func Run() error {
 	r.Get("/admin", adminHomeHandler(admin))
 	r.Get("/login", showLoginPage(login))
 	r.Get("/logout/{provider}", logoutHandler(logout))
+	r.Get("/bible", showBibleHandler(bible))
+
 	log.Printf("Listening on %s", addr)
 	return http.ListenAndServe(addr, r)
 }

@@ -18,7 +18,7 @@
                     <a class="nav-link" href="/contact">Contact us</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="/login">Login</a>
+                    <a class="nav-link" href="/bible">Bible</a>
                 </li>
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
@@ -38,9 +38,16 @@
                     <a class="nav-link disabled" aria-disabled="true">Disabled</a>
                 </li>
             </ul>
+            
+            {{if .UserID}}
+            <div class="d-flex">
+                <a class="btn btn-outline-danger" href="/logout/{{.Provider}}">Logout</a>
+            </div>
+            {{else}}
             <div class="d-flex">
                 <a class="btn btn-outline-success" href="/login">Login</a>
             </div>
+            {{end}}
             <!-- <form class="d-flex" role="search">
                 <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
             </form> -->
